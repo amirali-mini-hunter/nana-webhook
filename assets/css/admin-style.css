@@ -37,8 +37,8 @@ body {
     text-align: right;
     max-width: 95%;
     margin: 40px auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 30px;
 }
 
@@ -169,6 +169,7 @@ body {
 .nana-webhook-response-section {
     direction: ltr;
     text-align: left;
+    width: 100%;
 }
 
 .nana-webhook-response-content {
@@ -178,7 +179,9 @@ body {
     border-radius: 8px;
     white-space: pre-wrap;
     word-wrap: break-word;
-    min-height: 200px;
+    min-height: 400px;
     color: var(--text-color);
     font-family: 'Courier New', Courier, monospace;
+    width: 100%;
+    box-sizing: border-box;
 }
