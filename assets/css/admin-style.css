@@ -37,8 +37,8 @@ body {
     text-align: right;
     max-width: 95%;
     margin: 40px auto;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 30px;
     width: 100%;
 }
@@ -51,6 +51,7 @@ body {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
     width: 100%;
     box-sizing: border-box;
+    min-height: 500px;
 }
 
 .wrap.nana-webhook-main-wrap > h1 {
