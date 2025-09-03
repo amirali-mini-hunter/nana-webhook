@@ -146,12 +146,14 @@ body {
 
 .nana-webhook-sent-images .image-container {
     text-align: center;
+    font-family: var(--font-family);
 }
 
 .nana-webhook-sent-images h4 {
     color: var(--text-secondary-color);
     margin-bottom: 10px;
     font-weight: normal;
+    font-family: var(--font-family);
 }
 
 .nana-webhook-sent-images img {
