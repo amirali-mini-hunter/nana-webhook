@@ -1,0 +1,170 @@
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+
+:root {
+    --bg-color: #0D1117;
+    --card-bg: #161B22;
+    --border-color: #30363d;
+    --text-color: #c9d1d9;
+    --text-secondary-color: #8b949e;
+    --accent-color-1: #58a6ff;
+    --accent-color-2: #1f6feb;
+    --neon-border: #228be6;
+    --button-grad-1: #8e44ad;
+    --button-grad-2: #3498db;
+    --font-family: 'Vazirmatn', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color) !important;
+}
+
+.nana-webhook-body-bg {
+    display: none; /* No longer needed */
+}
+
+.wrap.nana-webhook-main-wrap {
+    font-family: var(--font-family);
+    color: var(--text-color);
+    background-color: var(--bg-color);
+}
+
+#wpcontent {
+    background: var(--bg-color);
+}
+
+.nana-webhook-wrap {
+    direction: rtl;
+    text-align: right;
+    max-width: 95%;
+    margin: 40px auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.nana-webhook-card {
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.wrap.nana-webhook-main-wrap > h1 {
+    font-family: var(--font-family);
+    color: var(--text-color);
+    text-align: center;
+    font-size: 2.2em;
+    margin: 20px 0 40px 0;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    text-shadow: 0 0 8px rgba(88, 166, 255, 0.5);
+}
+
+.nana-webhook-card h2, .nana-webhook-card h3 {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-top: 0;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.nana-webhook-wrap label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 400;
+    color: var(--text-secondary-color);
+}
+
+.nana-webhook-wrap input[type="text"], .nana-webhook-wrap textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-sizing: border-box;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-family);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.nana-webhook-wrap input[type="text"]:focus, .nana-webhook-wrap textarea:focus {
+    border-color: var(--neon-border);
+    box-shadow: 0 0 8px var(--neon-border);
+    outline: none;
+}
+
+.nana-webhook-wrap input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-color);
+    color: var(--text-secondary-color);
+}
+
+.nana-webhook-wrap input[type="file"]::file-selector-button {
+    background: linear-gradient(45deg, var(--button-grad-1), var(--button-grad-2));
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    margin-left: 10px;
+}
+.nana-webhook-wrap input[type="file"]::file-selector-button:hover {
+    transform: scale(1.05);
+}
+
+.nana-webhook-wrap .button-primary {
+    width: 100%;
+    padding: 15px;
+    height: auto;
+    font-size: 16px;
+    background: linear-gradient(45deg, var(--button-grad-1), var(--button-grad-2));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.3s;
+    font-family: var(--font-family);
+    font-weight: 500;
+}
+
+.nana-webhook-wrap .button-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(142, 68, 173, 0.4);
+}
+
+.nana-webhook-sent-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.nana-webhook-sent-images img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.nana-webhook-response-section {
+    direction: ltr;
+    text-align: left;
+}
+
+.nana-webhook-response-content {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    min-height: 200px;
+    color: var(--text-color);
+    font-family: 'Courier New', Courier, monospace;
+}
