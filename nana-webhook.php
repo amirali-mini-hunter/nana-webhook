@@ -12,9 +12,11 @@ if (!defined('ABSPATH')) exit;
 class NanaWebhook {
 
     public function __construct() {
-        add_action('admin_menu', [$this, 'add_menu']);
-        add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
-        add_action('admin_init', [$this, 'handle_form']);
+    add_action('admin_menu', [$this, 'add_menu']);
+    add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
+    add_action('admin_init', [$this, 'handle_form']);
+    add_action('wp_ajax_nana_webhook_ajax_send', [$this, 'ajax_send']);
+    add_action('wp_ajax_nana_fetch_history', [$this, 'ajax_fetch_history']);
     }
 
     public function add_menu() {
@@ -36,6 +38,102 @@ class NanaWebhook {
         $plugin_url = plugin_dir_url(__FILE__);
         wp_enqueue_style('nana-webhook-style', $plugin_url . 'assets/css/admin-style.css', [], '3.0');
         wp_enqueue_script('nana-webhook-script', $plugin_url . 'assets/js/admin-script.js', [], '3.0', true);
+        // Pass settings to JS
+        $settings = [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('nana_webhook_ajax'),
+            'maxSizeMB' => 2,
+            'allowedTypes' => ['image/jpeg','image/png','image/webp'],
+            'timeout' => 15,
+            'maxRetries' => 2,
+        ];
+        wp_localize_script('nana-webhook-script', 'NanaWebhookSettings', $settings);
+    }
+
+    // AJAX handler for uploads and sending to webhook
+    public function ajax_send() {
+        // Only allow logged-in users (admin page)
+        if (!isset($_POST['_ajax_nonce']) || !wp_verify_nonce($_POST['_ajax_nonce'], 'nana_webhook_ajax')) {
+            wp_send_json_error(['message' => 'توکن نامعتبر']);
+        }
+
+        $webhook_url = get_option('nana_webhook_url', '');
+        if (isset($_POST['nana_webhook_url'])) {
+            $webhook_url = esc_url_raw($_POST['nana_webhook_url']);
+            update_option('nana_webhook_url', $webhook_url);
+        }
+
+        $text = '';
+        if (isset($_POST['nana_webhook_text'])) {
+            $text = sanitize_textarea_field($_POST['nana_webhook_text']);
+        }
+
+        // Process uploads
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        require_once(ABSPATH . 'wp-admin/includes/media.php');
+        require_once(ABSPATH . 'wp-admin/includes/image.php');
+
+        $images = ['dress' => '', 'model' => ''];
+
+        if (!empty($_FILES['nana_webhook_dress_image']) && $_FILES['nana_webhook_dress_image']['error'] === UPLOAD_ERR_OK) {
+            $attach_id = media_handle_upload('nana_webhook_dress_image', 0);
+            if (!is_wp_error($attach_id)) {
+                $images['dress'] = wp_get_attachment_url($attach_id);
+                update_option('nana_webhook_last_dress_image', $images['dress']);
+            }
+        }
+
+        if (!empty($_FILES['nana_webhook_model_image']) && $_FILES['nana_webhook_model_image']['error'] === UPLOAD_ERR_OK) {
+            $attach_id = media_handle_upload('nana_webhook_model_image', 0);
+            if (!is_wp_error($attach_id)) {
+                $images['model'] = wp_get_attachment_url($attach_id);
+                update_option('nana_webhook_last_model_image', $images['model']);
+            }
+        }
+
+        // Send to webhook
+        $body = ['text' => $text, 'images' => array_values(array_filter($images))];
+        $response = wp_remote_post($webhook_url, [
+            'body' => json_encode($body),
+            'headers' => ['Content-Type' => 'application/json'],
+            'timeout' => 15,
+        ]);
+
+        if (is_wp_error($response)) {
+            $response_body = 'خطا در اتصال: ' . $response->get_error_message();
+            $status = 'error';
+        } else {
+            $response_body = wp_remote_retrieve_body($response);
+            $status = 'ok';
+        }
+
+        // Save history
+        $history = get_option('nana_webhook_history', []);
+        $entry = [
+            'time' => current_time('mysql'),
+            'text' => $text,
+            'images' => $images,
+            'response' => $response_body,
+            'status' => $status,
+        ];
+        array_unshift($history, $entry);
+        // Keep last 200 entries
+        $history = array_slice($history, 0, 200);
+        update_option('nana_webhook_history', $history);
+
+        // Return JSON
+        if ($status === 'ok') {
+            wp_send_json_success(['response' => $response_body, 'entry' => $entry]);
+        }
+        wp_send_json_error(['response' => $response_body, 'entry' => $entry]);
+    }
+
+    public function ajax_fetch_history() {
+        if (!isset($_POST['_ajax_nonce']) || !wp_verify_nonce($_POST['_ajax_nonce'], 'nana_webhook_ajax')) {
+            wp_send_json_error(['message' => 'توکن نامعتبر']);
+        }
+        $history = get_option('nana_webhook_history', []);
+        wp_send_json_success(['history' => $history]);
     }
 
     public function render_page() {
