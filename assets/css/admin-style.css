@@ -40,6 +40,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 30px;
+    width: 100%;
 }
 
 .nana-webhook-card {
@@ -48,6 +49,8 @@ body {
     border-radius: 10px;
     border: 1px solid var(--border-color);
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .wrap.nana-webhook-main-wrap > h1 {
