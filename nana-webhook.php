@@ -35,6 +35,7 @@ class NanaWebhook {
         }
         $plugin_url = plugin_dir_url(__FILE__);
         wp_enqueue_style('nana-webhook-style', $plugin_url . 'assets/css/admin-style.css', [], '3.0');
+        wp_enqueue_script('nana-webhook-script', $plugin_url . 'assets/js/admin-script.js', [], '3.0', true);
     }
 
     public function render_page() {
