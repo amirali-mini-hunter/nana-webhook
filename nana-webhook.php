@@ -39,7 +39,8 @@ class NanaWebhook {
 
     public function render_page() {
         $webhook_url = get_option('nana_webhook_url', '');
-        $last_images = get_option('nana_webhook_last_images', []);
+        $last_dress_image = get_option('nana_webhook_last_dress_image', '');
+        $last_model_image = get_option('nana_webhook_last_model_image', '');
         $last_text = get_option('nana_webhook_last_text', '');
         $last_response = get_option('nana_webhook_last_response', '');
         ?>
@@ -56,17 +57,30 @@ class NanaWebhook {
                         <label style="margin-top: 20px;">متن پیام:</label>
                         <textarea name="nana_webhook_text" rows="3"><?php echo esc_textarea($last_text); ?></textarea>
                         
-                        <label style="margin-top: 20px;">انتخاب عکس (تا ۳ عدد):</label>
-                        <input type="file" name="nana_webhook_images[]" multiple accept="image/*" />
+                        <label style="margin-top: 20px;">عکس لباس:</label>
+                        <input type="file" name="nana_webhook_dress_image" accept="image/*" />
+                        
+                        <label style="margin-top: 20px;">عکس مدل:</label>
+                        <input type="file" name="nana_webhook_model_image" accept="image/*" />
                         
                         <input style="margin-top: 30px;" type="submit" name="nana_webhook_submit" value="ارسال" class="button button-primary" />
                     </form>
-                    <?php if (!empty($last_images)): ?>
+                    
+                    <?php if (!empty($last_dress_image) || !empty($last_model_image)): ?>
                         <h3 style="margin-top:30px;">آخرین عکس‌های ارسالی:</h3>
                         <div class="nana-webhook-sent-images">
-                            <?php foreach ($last_images as $img): ?>
-                                <img src="<?php echo esc_url($img); ?>" />
-                            <?php endforeach; ?>
+                            <?php if (!empty($last_dress_image)): ?>
+                                <div class="image-container">
+                                    <h4>عکس لباس:</h4>
+                                    <img src="<?php echo esc_url($last_dress_image); ?>" />
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!empty($last_model_image)): ?>
+                                <div class="image-container">
+                                    <h4>عکس مدل:</h4>
+                                    <img src="<?php echo esc_url($last_model_image); ?>" />
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -94,45 +108,44 @@ class NanaWebhook {
 
             // پردازش آپلود تصاویر
             $images = $this->handle_image_upload();
-            // فقط در صورتی که تصاویر جدیدی آپلود شده باشد، مقدار قبلی را بازنویسی کن
-            if (!empty($images)) {
-                update_option('nana_webhook_last_images', $images);
-            }
 
             // ارسال به وب‌هوک
-            $this->send_to_webhook($webhook_url, $text, get_option('nana_webhook_last_images', []));
+            $this->send_to_webhook($webhook_url, $text, $images);
         }
     }
 
     private function handle_image_upload() {
-        $images = [];
-        if (!empty($_FILES['nana_webhook_images']['name'][0])) {
-            require_once(ABSPATH . 'wp-admin/includes/file.php');
-            require_once(ABSPATH . 'wp-admin/includes/media.php');
-            require_once(ABSPATH . 'wp-admin/includes/image.php');
-            
-            $files = $_FILES['nana_webhook_images'];
-            $file_count = count($files['name']);
-
-            for ($i = 0; $i < min(3, $file_count); $i++) {
-                if ($files['error'][$i] === UPLOAD_ERR_OK) {
-                    // بازسازی آرایه فایل برای هر فایل
-                    $file_tmp = [
-                        'name'     => $files['name'][$i],
-                        'type'     => $files['type'][$i],
-                        'tmp_name' => $files['tmp_name'][$i],
-                        'error'    => $files['error'][$i],
-                        'size'     => $files['size'][$i],
-                    ];
-
-                    $attachment_id = media_handle_sideload($file_tmp, 0);
-
-                    if (!is_wp_error($attachment_id)) {
-                        $images[] = wp_get_attachment_url($attachment_id);
-                    }
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        require_once(ABSPATH . 'wp-admin/includes/media.php');
+        require_once(ABSPATH . 'wp-admin/includes/image.php');
+        
+        $images = [
+            'dress' => '',
+            'model' => ''
+        ];
+        
+        // آپلود عکس لباس
+        if (!empty($_FILES['nana_webhook_dress_image']['name'])) {
+            if ($_FILES['nana_webhook_dress_image']['error'] === UPLOAD_ERR_OK) {
+                $attachment_id = media_handle_upload('nana_webhook_dress_image', 0);
+                if (!is_wp_error($attachment_id)) {
+                    $images['dress'] = wp_get_attachment_url($attachment_id);
+                    update_option('nana_webhook_last_dress_image', $images['dress']);
                 }
             }
         }
+        
+        // آپلود عکس مدل
+        if (!empty($_FILES['nana_webhook_model_image']['name'])) {
+            if ($_FILES['nana_webhook_model_image']['error'] === UPLOAD_ERR_OK) {
+                $attachment_id = media_handle_upload('nana_webhook_model_image', 0);
+                if (!is_wp_error($attachment_id)) {
+                    $images['model'] = wp_get_attachment_url($attachment_id);
+                    update_option('nana_webhook_last_model_image', $images['model']);
+                }
+            }
+        }
+        
         return $images;
     }
 
